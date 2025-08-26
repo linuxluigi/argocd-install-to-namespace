@@ -3,7 +3,7 @@
 
 NAMESPACE ?= argocd
 BASE_DIR = download
-OUTPUT_DIR = output
+OUTPUT_DIR = manifest
 
 # URLs for manifests
 MANIFEST_URL_STABLE = https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
