@@ -22,8 +22,8 @@ This repository automates downloading ArgoCD install manifests and customizing t
    ```
 
    - Outputs:
-     - `output/argocd-namespaced-stable.yaml`
-     - `output/argocd-namespaced-ha.yaml`
+     - `manifest/argocd-namespaced-stable.yaml`
+     - `manifest/argocd-namespaced-ha.yaml`
 
 3. **Clean generated files**
 
