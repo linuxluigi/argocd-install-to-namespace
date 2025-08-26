@@ -46,13 +46,15 @@ download: download-stable download-ha
 kustomize-stable: download-stable
 	@mkdir -p $(KUSTOMIZE_DIR_STABLE)
 	@cp $(MANIFEST_FILE_STABLE) $(KUSTOMIZE_DIR_STABLE)/install.yaml
-	@echo "resources:\n  - install.yaml\nnamespace: $(NAMESPACE)" > $(KUSTOMIZE_DIR_STABLE)/kustomization.yaml
+	@echo "apiVersion: v1\nkind: Namespace\nmetadata:\n  name: $(NAMESPACE)" > $(KUSTOMIZE_DIR_STABLE)/namespace.yaml
+	@echo "resources:\n  - install.yaml\n  - namespace.yaml\nnamespace: $(NAMESPACE)" > $(KUSTOMIZE_DIR_STABLE)/kustomization.yaml
 
 # Kustomize for HA
 kustomize-ha: download-ha
 	@mkdir -p $(KUSTOMIZE_DIR_HA)
 	@cp $(MANIFEST_FILE_HA) $(KUSTOMIZE_DIR_HA)/install.yaml
-	@echo "resources:\n  - install.yaml\nnamespace: $(NAMESPACE)" > $(KUSTOMIZE_DIR_HA)/kustomization.yaml
+	@echo "apiVersion: v1\nkind: Namespace\nmetadata:\n  name: $(NAMESPACE)" > $(KUSTOMIZE_DIR_HA)/namespace.yaml
+	@echo "resources:\n  - install.yaml\n  - namespace.yaml\nnamespace: $(NAMESPACE)" > $(KUSTOMIZE_DIR_HA)/kustomization.yaml
 
 
 # Build stable manifest
