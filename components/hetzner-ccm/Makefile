@@ -10,12 +10,20 @@ HELM_REPO_NAME = hcloud
 HELM_REPO_URL = https://charts.hetzner.cloud
 HELM_CHART = hcloud/hcloud-cloud-controller-manager
 
-# Output files
-FINAL_MANIFEST = $(OUTPUT_DIR)/hetzner-ccm.yaml
+# Build directories for different variants
+BUILD_DIR_PUBLIC = $(BUILD_DIR)/public
+BUILD_DIR_PRIVATE = $(BUILD_DIR)/private
 
-.PHONY: all helm-repo-add helm-repo-update template build clean
+# Output files
+FINAL_MANIFEST_PUBLIC = $(OUTPUT_DIR)/hetzner-ccm-public.yaml
+FINAL_MANIFEST_PRIVATE = $(OUTPUT_DIR)/hetzner-ccm-private.yaml
+
+.PHONY: all helm-repo-add helm-repo-update template-public template-private build build-public build-private clean
 
 all: build
+
+# Build both variants
+build: build-public build-private
 
 # Add Helm repository
 helm-repo-add:
@@ -27,33 +35,67 @@ helm-repo-update: helm-repo-add
 	@echo "Updating Helm repositories..."
 	helm repo update $(HELM_REPO_NAME)
 
-# Template the Helm chart to generate manifests
-template: helm-repo-update
-	@mkdir -p $(BUILD_DIR)
-	@echo "Templating Hetzner CCM Helm chart..."
-	helm template $(RELEASE_NAME) $(HELM_CHART) \
+# Template the Helm chart for public network (default configuration)
+template-public: helm-repo-update
+	@mkdir -p $(BUILD_DIR_PUBLIC)
+	@echo "Templating Hetzner CCM Helm chart for public network..."
+	helm template $(RELEASE_NAME)-public $(HELM_CHART) \
 		--namespace $(NAMESPACE) \
 		--create-namespace \
-		--output-dir $(BUILD_DIR)
+		--output-dir $(BUILD_DIR_PUBLIC)
 
-# Build manifest
-build: template
+# Template the Helm chart for private network (with networking enabled)
+template-private: helm-repo-update
+	@mkdir -p $(BUILD_DIR_PRIVATE)
+	@echo "Templating Hetzner CCM Helm chart for private network..."
+	helm template $(RELEASE_NAME)-private $(HELM_CHART) \
+		--namespace $(NAMESPACE) \
+		--create-namespace \
+		--set networking.enabled=true \
+		--set networking.clusterCIDR=172.20.0.0/16 \
+		--output-dir $(BUILD_DIR_PRIVATE)
+
+# Build public network manifest
+build-public: template-public
 	@mkdir -p $(OUTPUT_DIR)
-	@echo "Building Hetzner CCM manifest..."
-	@echo "---" > $(FINAL_MANIFEST)
-	@echo "apiVersion: v1" >> $(FINAL_MANIFEST)
-	@echo "kind: Namespace" >> $(FINAL_MANIFEST)
-	@echo "metadata:" >> $(FINAL_MANIFEST)
-	@echo "  name: $(NAMESPACE)" >> $(FINAL_MANIFEST)
-	@echo "---" >> $(FINAL_MANIFEST)
-	@find $(BUILD_DIR) -name "*.yaml" -exec cat {} \; >> $(FINAL_MANIFEST)
+	@echo "Building Hetzner CCM public network manifest..."
+	@echo "---" > $(FINAL_MANIFEST_PUBLIC)
+	@echo "apiVersion: v1" >> $(FINAL_MANIFEST_PUBLIC)
+	@echo "kind: Namespace" >> $(FINAL_MANIFEST_PUBLIC)
+	@echo "metadata:" >> $(FINAL_MANIFEST_PUBLIC)
+	@echo "  name: $(NAMESPACE)" >> $(FINAL_MANIFEST_PUBLIC)
+	@echo "---" >> $(FINAL_MANIFEST_PUBLIC)
+	@find $(BUILD_DIR_PUBLIC) -name "*.yaml" -exec cat {} \; >> $(FINAL_MANIFEST_PUBLIC)
 
-# Install via Helm (for reference, not used in manifest generation)
-install: helm-repo-update
-	@echo "Installing Hetzner CCM via Helm..."
-	helm upgrade --install $(RELEASE_NAME) $(HELM_CHART) \
+# Build private network manifest
+build-private: template-private
+	@mkdir -p $(OUTPUT_DIR)
+	@echo "Building Hetzner CCM private network manifest..."
+	@echo "---" > $(FINAL_MANIFEST_PRIVATE)
+	@echo "apiVersion: v1" >> $(FINAL_MANIFEST_PRIVATE)
+	@echo "kind: Namespace" >> $(FINAL_MANIFEST_PRIVATE)
+	@echo "metadata:" >> $(FINAL_MANIFEST_PRIVATE)
+	@echo "  name: $(NAMESPACE)" >> $(FINAL_MANIFEST_PRIVATE)
+	@echo "---" >> $(FINAL_MANIFEST_PRIVATE)
+	@find $(BUILD_DIR_PRIVATE) -name "*.yaml" -exec cat {} \; >> $(FINAL_MANIFEST_PRIVATE)
+
+# Install public network variant via Helm (for reference, not used in manifest generation)
+install-public: helm-repo-update
+	@echo "Installing Hetzner CCM (public network) via Helm..."
+	helm upgrade --install $(RELEASE_NAME)-public $(HELM_CHART) \
 		--namespace $(NAMESPACE) \
 		--create-namespace
+
+# Install private network variant via Helm (for reference, not used in manifest generation)
+install-private: helm-repo-update
+	@echo "Installing Hetzner CCM (private network) via Helm..."
+	helm upgrade --install $(RELEASE_NAME)-private $(HELM_CHART) \
+		--namespace $(NAMESPACE) \
+		--create-namespace \
+		--set networking.enabled=true
+
+# Legacy install target (defaults to public)
+install: install-public
 
 clean:
 	rm -rf $(BUILD_DIR)

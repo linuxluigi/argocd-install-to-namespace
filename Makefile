@@ -16,7 +16,7 @@ OUTPUT_DIR = manifest
 # Component list
 COMPONENTS = argocd hetzner-ccm
 
-.PHONY: all build clean help list-components argocd hetzner-ccm
+.PHONY: all build clean help list-components argocd hetzner-ccm hetzner-ccm-public hetzner-ccm-private
 
 # Default target builds all components
 all: build
@@ -32,10 +32,20 @@ argocd:
 	@echo "🏗️  Building ArgoCD components..."
 	@$(MAKE) -C $(ARGOCD_DIR) build NAMESPACE=$(ARGOCD_NAMESPACE)
 
-# Build Hetzner CCM component
+# Build Hetzner CCM components (both public and private)
 hetzner-ccm:
-	@echo "🏗️  Building Hetzner CCM component..."
+	@echo "🏗️  Building Hetzner CCM components..."
 	@$(MAKE) -C $(HETZNER_CCM_DIR) build NAMESPACE=$(HETZNER_CCM_NAMESPACE)
+
+# Build only Hetzner CCM public network variant
+hetzner-ccm-public:
+	@echo "🏗️  Building Hetzner CCM (public network)..."
+	@$(MAKE) -C $(HETZNER_CCM_DIR) build-public NAMESPACE=$(HETZNER_CCM_NAMESPACE)
+
+# Build only Hetzner CCM private network variant
+hetzner-ccm-private:
+	@echo "🏗️  Building Hetzner CCM (private network)..."
+	@$(MAKE) -C $(HETZNER_CCM_DIR) build-private NAMESPACE=$(HETZNER_CCM_NAMESPACE)
 
 # Clean all components
 clean:
@@ -58,13 +68,15 @@ help:
 	@echo "🚀 Multi-Component Kubernetes Manifest Generator"
 	@echo ""
 	@echo "Available targets:"
-	@echo "  all              - Build all components (default)"
-	@echo "  build            - Build all components"
-	@echo "  argocd           - Build only ArgoCD components"
-	@echo "  hetzner-ccm      - Build only Hetzner CCM component"
-	@echo "  clean            - Clean all generated files"
-	@echo "  list-components  - List available components"
-	@echo "  help             - Show this help message"
+	@echo "  all                  - Build all components (default)"
+	@echo "  build                - Build all components"
+	@echo "  argocd               - Build only ArgoCD components"
+	@echo "  hetzner-ccm          - Build both Hetzner CCM variants"
+	@echo "  hetzner-ccm-public   - Build only Hetzner CCM (public network)"
+	@echo "  hetzner-ccm-private  - Build only Hetzner CCM (private network)"
+	@echo "  clean                - Clean all generated files"
+	@echo "  list-components      - List available components"
+	@echo "  help                 - Show this help message"
 	@echo ""
 	@echo "Configuration:"
 	@echo "  ARGOCD_NAMESPACE      - Namespace for ArgoCD (default: argocd)"
@@ -74,3 +86,4 @@ help:
 	@echo "  make build"
 	@echo "  make argocd ARGOCD_NAMESPACE=my-argocd"
 	@echo "  make hetzner-ccm HETZNER_CCM_NAMESPACE=hetzner-system"
+	@echo "  make hetzner-ccm-private"

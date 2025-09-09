@@ -12,6 +12,8 @@ This repository provides a modular approach to generating Kubernetes manifests f
 
 ### 2. Hetzner Cloud Controller Manager (CCM)
 
+- **Public Network**: Standard configuration for public network usage
+- **Private Network**: Configuration with `networking.enabled=true` for internal networking
 - **Helm-based**: Generated from official Hetzner Helm charts
 - **Namespace**: `kube-system` (configurable)
 
@@ -56,7 +58,8 @@ This generates:
 
 - `manifest/argocd-namespaced-stable.yaml`
 - `manifest/argocd-namespaced-ha.yaml`
-- `manifest/hetzner-ccm.yaml`
+- `manifest/hetzner-ccm-public.yaml`
+- `manifest/hetzner-ccm-private.yaml`
 
 ### Build Individual Components
 
@@ -64,8 +67,14 @@ This generates:
 # Build only ArgoCD
 make argocd
 
-# Build only Hetzner CCM
+# Build both Hetzner CCM variants
 make hetzner-ccm
+
+# Build only Hetzner CCM public network variant
+make hetzner-ccm-public
+
+# Build only Hetzner CCM private network variant
+make hetzner-ccm-private
 ```
 
 ### Custom Namespaces
@@ -86,9 +95,18 @@ kubectl apply -f manifest/argocd-namespaced-stable.yaml
 
 ### Deploy Hetzner CCM
 
+**Public Network (Default):**
+
 ```bash
-make hetzner-ccm
-kubectl apply -f manifest/hetzner-ccm.yaml
+make hetzner-ccm-public
+kubectl apply -f manifest/hetzner-ccm-public.yaml
+```
+
+**Private Network (Internal Networking):**
+
+```bash
+make hetzner-ccm-private
+kubectl apply -f manifest/hetzner-ccm-private.yaml
 ```
 
 ### Complete Multi-Component Deployment
