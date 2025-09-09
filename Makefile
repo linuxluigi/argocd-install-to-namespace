@@ -1,76 +1,76 @@
-# Makefile for downloading ArgoCD manifest and adding namespace using Kustomize
+# Multi-Component Kubernetes Manifest Generator
+# Orchestrates building manifests for multiple components
 
+# Default namespace configurations
+ARGOCD_NAMESPACE ?= argocd
+HETZNER_CCM_NAMESPACE ?= kube-system
 
-NAMESPACE ?= argocd
-BASE_DIR = download
+# Component directories
+COMPONENTS_DIR = components
+ARGOCD_DIR = $(COMPONENTS_DIR)/argocd
+HETZNER_CCM_DIR = $(COMPONENTS_DIR)/hetzner-ccm
+
+# Output directory
 OUTPUT_DIR = manifest
 
-# URLs for manifests
-MANIFEST_URL_STABLE = https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-MANIFEST_URL_HA = https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/ha/install.yaml
+# Component list
+COMPONENTS = argocd hetzner-ccm
 
-# Manifest file paths
-MANIFEST_FILE_STABLE = $(BASE_DIR)/install.yaml
-MANIFEST_FILE_HA = $(BASE_DIR)/ha-install.yaml
+.PHONY: all build clean help list-components argocd hetzner-ccm
 
-# Kustomize directories
-KUSTOMIZE_DIR_STABLE = kustomize-stable
-KUSTOMIZE_DIR_HA = kustomize-ha
+# Default target builds all components
+all: build
 
-# Output files
-FINAL_MANIFEST_STABLE = $(OUTPUT_DIR)/argocd-namespaced-stable.yaml
-FINAL_MANIFEST_HA = $(OUTPUT_DIR)/argocd-namespaced-ha.yaml
+# Build all components
+build: argocd hetzner-ccm
+	@echo "✅ All components built successfully!"
+	@echo "📁 Manifests available in: $(OUTPUT_DIR)/"
+	@ls -la $(OUTPUT_DIR)/
 
+# Build ArgoCD components
+argocd:
+	@echo "🏗️  Building ArgoCD components..."
+	@$(MAKE) -C $(ARGOCD_DIR) build NAMESPACE=$(ARGOCD_NAMESPACE)
 
-.PHONY: all download download-stable download-ha kustomize-stable kustomize-ha build build-stable build-ha clean
+# Build Hetzner CCM component
+hetzner-ccm:
+	@echo "🏗️  Building Hetzner CCM component..."
+	@$(MAKE) -C $(HETZNER_CCM_DIR) build NAMESPACE=$(HETZNER_CCM_NAMESPACE)
 
-
-all: build-stable build-ha
-
-
-# Download stable manifest
-download-stable:
-	@mkdir -p $(BASE_DIR)
-	curl -sSL $(MANIFEST_URL_STABLE) -o $(MANIFEST_FILE_STABLE)
-
-# Download HA manifest
-download-ha:
-	@mkdir -p $(BASE_DIR)
-	curl -sSL $(MANIFEST_URL_HA) -o $(MANIFEST_FILE_HA)
-
-# Download both
-download: download-stable download-ha
-
-
-# Kustomize for stable
-kustomize-stable: download-stable
-	@mkdir -p $(KUSTOMIZE_DIR_STABLE)
-	@cp $(MANIFEST_FILE_STABLE) $(KUSTOMIZE_DIR_STABLE)/install.yaml
-	@echo "apiVersion: v1\nkind: Namespace\nmetadata:\n  name: $(NAMESPACE)" > $(KUSTOMIZE_DIR_STABLE)/namespace.yaml
-	@echo "resources:\n  - install.yaml\n  - namespace.yaml\nnamespace: $(NAMESPACE)" > $(KUSTOMIZE_DIR_STABLE)/kustomization.yaml
-
-# Kustomize for HA
-kustomize-ha: download-ha
-	@mkdir -p $(KUSTOMIZE_DIR_HA)
-	@cp $(MANIFEST_FILE_HA) $(KUSTOMIZE_DIR_HA)/install.yaml
-	@echo "apiVersion: v1\nkind: Namespace\nmetadata:\n  name: $(NAMESPACE)" > $(KUSTOMIZE_DIR_HA)/namespace.yaml
-	@echo "resources:\n  - install.yaml\n  - namespace.yaml\nnamespace: $(NAMESPACE)" > $(KUSTOMIZE_DIR_HA)/kustomization.yaml
-
-
-# Build stable manifest
-build-stable: kustomize-stable
-	@mkdir -p $(OUTPUT_DIR)
-	kustomize build $(KUSTOMIZE_DIR_STABLE) > $(FINAL_MANIFEST_STABLE)
-
-# Build HA manifest
-build-ha: kustomize-ha
-	@mkdir -p $(OUTPUT_DIR)
-	kustomize build $(KUSTOMIZE_DIR_HA) > $(FINAL_MANIFEST_HA)
-
-# Build both
-build: build-stable build-ha
-
+# Clean all components
 clean:
-	rm -rf $(KUSTOMIZE_DIR_STABLE) $(KUSTOMIZE_DIR_HA) $(BASE_DIR) $(OUTPUT_DIR)
-	rm -rf $(KUSTOMIZE_DIR) $(BASE_DIR) $(OUTPUT_DIR)
-	rm -rf $(KUSTOMIZE_DIR) $(MANIFEST_FILE) $(FINAL_MANIFEST)
+	@echo "🧹 Cleaning all components..."
+	@$(MAKE) -C $(ARGOCD_DIR) clean
+	@$(MAKE) -C $(HETZNER_CCM_DIR) clean
+	@rm -rf $(OUTPUT_DIR)
+	@rm -rf build/
+	@echo "✅ Cleanup completed!"
+
+# List available components
+list-components:
+	@echo "📋 Available components:"
+	@for component in $(COMPONENTS); do \
+		echo "  - $$component"; \
+	done
+
+# Show help
+help:
+	@echo "🚀 Multi-Component Kubernetes Manifest Generator"
+	@echo ""
+	@echo "Available targets:"
+	@echo "  all              - Build all components (default)"
+	@echo "  build            - Build all components"
+	@echo "  argocd           - Build only ArgoCD components"
+	@echo "  hetzner-ccm      - Build only Hetzner CCM component"
+	@echo "  clean            - Clean all generated files"
+	@echo "  list-components  - List available components"
+	@echo "  help             - Show this help message"
+	@echo ""
+	@echo "Configuration:"
+	@echo "  ARGOCD_NAMESPACE      - Namespace for ArgoCD (default: argocd)"
+	@echo "  HETZNER_CCM_NAMESPACE - Namespace for Hetzner CCM (default: kube-system)"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make build"
+	@echo "  make argocd ARGOCD_NAMESPACE=my-argocd"
+	@echo "  make hetzner-ccm HETZNER_CCM_NAMESPACE=hetzner-system"

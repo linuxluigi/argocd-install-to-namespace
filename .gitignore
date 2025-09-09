@@ -2,7 +2,14 @@
 # Project #
 ###########
 
-# argocd base manifest
+# Generated manifests and build artifacts
+build/
+
+# Component-specific build files
+components/*/download/
+components/*/kustomize-*/
+
+# Legacy directories (can be removed after migration)
 download/
 kustomize-ha/
 kustomize-stable/
