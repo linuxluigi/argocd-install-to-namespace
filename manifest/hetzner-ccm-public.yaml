@@ -16,12 +16,12 @@ spec:
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app.kubernetes.io/instance: 'hccm-public'
+      app.kubernetes.io/instance: 'hetzner-ccm'
       app.kubernetes.io/name: 'hcloud-cloud-controller-manager'
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: 'hccm-public'
+        app.kubernetes.io/instance: 'hetzner-ccm'
         app.kubernetes.io/name: 'hcloud-cloud-controller-manager'
     spec:
       serviceAccountName: hcloud-cloud-controller-manager

@@ -20,7 +20,10 @@ This component generates Hetzner Cloud Controller Manager manifests using Helm t
 
 - **Namespace**: `kube-system` (configurable via `NAMESPACE` variable)
 - **Release Name**: `hccm` (configurable via `RELEASE_NAME` variable)
-- **Helm Chart**: `hcloud/hcloud-cloud-controller-manager` Cloud Controller Manager Component
+- **Helm Chart**: `hcloud/hcloud-cloud-controller-manager`
+- **Values Files**:
+  - `values.yaml` - Base configuration for both variants
+  - `values-private.yaml` - Additional configuration for private network Cloud Controller Manager Component
 
 This component generates Hetzner Cloud Controller Manager manifests using Helm templating.
 
@@ -67,12 +70,33 @@ make clean
 - `../../manifest/hetzner-ccm-public.yaml` - Public network configuration
 - `../../manifest/hetzner-ccm-private.yaml` - Private network configuration
 
+## Configuration Files
+
+### values.yaml
+
+Base configuration file containing common settings for both public and private network deployments:
+
+- Resource limits and requests
+- Security contexts
+- Node selectors and tolerations
+- Health check configurations
+
+### values-private.yaml
+
+Additional configuration for private network deployments:
+
+- Enables host networking
+- Sets private network cluster CIDR
+- Configures environment variables for Hetzner network integration
+- Adds private network specific arguments
+
 ## Notes
 
 The generated manifest includes:
 
 - Namespace creation
 - All Hetzner CCM resources templated from the official Helm chart
+- Configuration from values files for consistent deployments
 
 For direct Helm installation, you can use the install targets:
 
