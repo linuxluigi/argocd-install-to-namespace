@@ -17,6 +17,15 @@ This repository provides a modular approach to generating Kubernetes manifests f
 - **Helm-based**: Generated from official Hetzner Helm charts
 - **Namespace**: `kube-system` (configurable)
 
+### 3. Cilium CNI
+
+- **With kube-proxy**: Standard Cilium deployment alongside existing kube-proxy
+- **With kube-proxy + GatewayAPI**: Cilium with kube-proxy and Gateway API support
+- **Without kube-proxy**: Cilium replaces kube-proxy for better performance
+- **Without kube-proxy + GatewayAPI**: Full Cilium networking with Gateway API
+- **Talos-optimized**: Pre-configured for Talos Linux compatibility
+- **Namespace**: `kube-system` (configurable)
+
 ## 📁 Project Structure
 
 ```text
@@ -25,7 +34,10 @@ This repository provides a modular approach to generating Kubernetes manifests f
 │   ├── argocd/                 # ArgoCD component
 │   │   ├── Makefile
 │   │   └── README.md
-│   └── hetzner-ccm/           # Hetzner CCM component
+│   ├── hetzner-ccm/           # Hetzner CCM component
+│   │   ├── Makefile
+│   │   └── README.md
+│   └── cilium/                # Cilium CNI component
 │       ├── Makefile
 │       └── README.md
 ├── manifest/                   # Generated manifests
@@ -75,13 +87,22 @@ make hetzner-ccm-public
 
 # Build only Hetzner CCM private network variant
 make hetzner-ccm-private
+
+# Build all Cilium variants
+make cilium
+
+# Build specific Cilium variants
+make cilium-kube-proxy                    # With kube-proxy
+make cilium-kube-proxy-gateway            # With kube-proxy + GatewayAPI
+make cilium-no-kube-proxy                 # Without kube-proxy
+make cilium-no-kube-proxy-gateway         # Without kube-proxy + GatewayAPI
 ```
 
 ### Custom Namespaces
 
 ```bash
 # Build with custom namespaces
-make build ARGOCD_NAMESPACE=my-argocd HETZNER_CCM_NAMESPACE=hetzner-system
+make build ARGOCD_NAMESPACE=my-argocd HETZNER_CCM_NAMESPACE=hetzner-system CILIUM_NAMESPACE=cilium-system
 ```
 
 ## 🎯 Usage Examples
@@ -109,6 +130,29 @@ make hetzner-ccm-private
 kubectl apply -f manifest/hetzner-ccm-private.yaml
 ```
 
+### Deploy Cilium CNI
+
+**With kube-proxy (recommended for existing clusters):**
+
+```bash
+make cilium-kube-proxy
+kubectl apply -f manifest/cilium-with-kube-proxy.yaml
+```
+
+**Without kube-proxy (performance optimized for Talos):**
+
+```bash
+make cilium-no-kube-proxy
+kubectl apply -f manifest/cilium-without-kube-proxy.yaml
+```
+
+**With GatewayAPI support:**
+
+```bash
+make cilium-kube-proxy-gateway
+kubectl apply -f manifest/cilium-with-kube-proxy-gateway.yaml
+```
+
 ### Complete Multi-Component Deployment
 
 ```bash
@@ -132,6 +176,7 @@ Each component has its own README with detailed usage instructions:
 
 - [ArgoCD Component](components/argocd/README.md)
 - [Hetzner CCM Component](components/hetzner-ccm/README.md)
+- [Cilium CNI Component](components/cilium/README.md)
 
 ## 🔧 Advanced Configuration
 
@@ -152,6 +197,23 @@ The Hetzner CCM component uses Helm templating. You can customize the release na
 ```bash
 cd components/hetzner-ccm
 make build RELEASE_NAME=my-hccm NAMESPACE=custom-namespace
+```
+
+### Cilium Configuration
+
+The Cilium component offers multiple deployment variants optimized for different use cases:
+
+```bash
+cd components/cilium
+
+# Build specific variants
+make build-kube-proxy                    # Standard with kube-proxy
+make build-no-kube-proxy                 # Replace kube-proxy for performance
+make build-kube-proxy-gateway            # Standard + Gateway API
+make build-no-kube-proxy-gateway         # Performance + Gateway API
+
+# Customize version and namespace
+make build CILIUM_VERSION=1.18.0 NAMESPACE=cilium-system
 ```
 
 ## 🆘 Help
