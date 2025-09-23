@@ -4,7 +4,7 @@ This component generates Kubernetes manifests for Cilium CNI with different conf
 
 ## Available Variants
 
-The component builds four different manifest variants:
+The component builds two different manifest variants:
 
 ### 1. With kube-proxy (without GatewayAPI)
 
@@ -17,24 +17,14 @@ The component builds four different manifest variants:
 - **File**: `cilium-with-kube-proxy-gateway.yaml`
 - **Description**: Cilium with kube-proxy and Gateway API support enabled
 - **Use case**: Modern load balancing and ingress with Gateway API while keeping kube-proxy
-
-### 3. Without kube-proxy (without GatewayAPI)
-
-- **File**: `cilium-without-kube-proxy.yaml`
-- **Description**: Cilium replaces kube-proxy completely for better performance
-- **Use case**: High-performance clusters where Cilium handles all networking
-
-### 4. Without kube-proxy with GatewayAPI
-
-- **File**: `cilium-without-kube-proxy-gateway.yaml`
-- **Description**: Full Cilium networking with Gateway API support
 - **Use case**: Modern cloud-native clusters with advanced networking features
 
 ## Configuration
 
-All variants use these common Talos-specific settings:
+Both variants use these common Talos-specific settings:
 
 - `ipam.mode=kubernetes` - Use Kubernetes IPAM
+- `kubeProxyReplacement=false` - Works alongside existing kube-proxy
 - `cgroup.autoMount.enabled=false` - Disable cgroup auto-mounting for Talos
 - `cgroup.hostRoot=/sys/fs/cgroup` - Talos cgroup path
 - Enhanced security capabilities for Talos compatibility
@@ -52,8 +42,6 @@ Build specific variants:
 ```bash
 make -C components/cilium build-kube-proxy
 make -C components/cilium build-kube-proxy-gateway
-make -C components/cilium build-no-kube-proxy
-make -C components/cilium build-no-kube-proxy-gateway
 ```
 
 ## Parameters

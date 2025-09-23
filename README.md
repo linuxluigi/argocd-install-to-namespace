@@ -21,8 +21,6 @@ This repository provides a modular approach to generating Kubernetes manifests f
 
 - **With kube-proxy**: Standard Cilium deployment alongside existing kube-proxy
 - **With kube-proxy + GatewayAPI**: Cilium with kube-proxy and Gateway API support
-- **Without kube-proxy**: Cilium replaces kube-proxy for better performance
-- **Without kube-proxy + GatewayAPI**: Full Cilium networking with Gateway API
 - **Talos-optimized**: Pre-configured for Talos Linux compatibility
 - **Namespace**: `kube-system` (configurable)
 
@@ -94,8 +92,6 @@ make cilium
 # Build specific Cilium variants
 make cilium-kube-proxy                    # With kube-proxy
 make cilium-kube-proxy-gateway            # With kube-proxy + GatewayAPI
-make cilium-no-kube-proxy                 # Without kube-proxy
-make cilium-no-kube-proxy-gateway         # Without kube-proxy + GatewayAPI
 ```
 
 ### Custom Namespaces
@@ -139,14 +135,7 @@ make cilium-kube-proxy
 kubectl apply -f manifest/cilium-with-kube-proxy.yaml
 ```
 
-**Without kube-proxy (performance optimized for Talos):**
-
-```bash
-make cilium-no-kube-proxy
-kubectl apply -f manifest/cilium-without-kube-proxy.yaml
-```
-
-**With GatewayAPI support:**
+**With kube-proxy and GatewayAPI support:**
 
 ```bash
 make cilium-kube-proxy-gateway

@@ -18,7 +18,7 @@ OUTPUT_DIR = manifest
 # Component list
 COMPONENTS = argocd hetzner-ccm cilium
 
-.PHONY: all build clean help list-components argocd hetzner-ccm hetzner-ccm-public hetzner-ccm-private cilium cilium-kube-proxy cilium-kube-proxy-gateway cilium-no-kube-proxy cilium-no-kube-proxy-gateway
+.PHONY: all build clean help list-components argocd hetzner-ccm hetzner-ccm-public hetzner-ccm-private cilium cilium-kube-proxy cilium-kube-proxy-gateway
 
 # Default target builds all components
 all: build
@@ -64,16 +64,6 @@ cilium-kube-proxy-gateway:
 	@echo "🏗️  Building Cilium with kube-proxy and GatewayAPI..."
 	@$(MAKE) -C $(CILIUM_DIR) build-kube-proxy-gateway NAMESPACE=$(CILIUM_NAMESPACE)
 
-# Build only Cilium without kube-proxy (without GatewayAPI)
-cilium-no-kube-proxy:
-	@echo "🏗️  Building Cilium without kube-proxy..."
-	@$(MAKE) -C $(CILIUM_DIR) build-no-kube-proxy NAMESPACE=$(CILIUM_NAMESPACE)
-
-# Build only Cilium without kube-proxy with GatewayAPI
-cilium-no-kube-proxy-gateway:
-	@echo "🏗️  Building Cilium without kube-proxy and with GatewayAPI..."
-	@$(MAKE) -C $(CILIUM_DIR) build-no-kube-proxy-gateway NAMESPACE=$(CILIUM_NAMESPACE)
-
 # Clean all components
 clean:
 	@echo "🧹 Cleaning all components..."
@@ -105,8 +95,6 @@ help:
 	@echo "  cilium                       - Build all Cilium variants"
 	@echo "  cilium-kube-proxy            - Build Cilium with kube-proxy"
 	@echo "  cilium-kube-proxy-gateway    - Build Cilium with kube-proxy and GatewayAPI"
-	@echo "  cilium-no-kube-proxy         - Build Cilium without kube-proxy"
-	@echo "  cilium-no-kube-proxy-gateway - Build Cilium without kube-proxy and GatewayAPI"
 	@echo "  clean                        - Clean all generated files"
 	@echo "  list-components              - List available components"
 	@echo "  help                         - Show this help message"
@@ -121,5 +109,5 @@ help:
 	@echo "  make argocd ARGOCD_NAMESPACE=my-argocd"
 	@echo "  make hetzner-ccm HETZNER_CCM_NAMESPACE=hetzner-system"
 	@echo "  make hetzner-ccm-private"
-	@echo "  make cilium-no-kube-proxy"
+	@echo "  make cilium-kube-proxy"
 	@echo "  make cilium-kube-proxy-gateway CILIUM_NAMESPACE=cilium-system"
