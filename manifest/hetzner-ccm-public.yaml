@@ -44,6 +44,13 @@ spec:
 
         - key: "node.kubernetes.io/not-ready"
           effect: "NoExecute"
+        
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+          operator: Equal
+      nodeSelector:
+        
+        node-role.kubernetes.io/control-plane: ""
       containers:
         - name: hcloud-cloud-controller-manager
           args:
