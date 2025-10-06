@@ -1,7 +1,8 @@
 # Hetzner Cloud Controller Manager Values
 # This file contains common configuration for Hetzner CCM deployments
 
-kind: DaemonSet # Use DaemonSet to run the CCM on all control plane nodes
+kind: DaemonSet
+replicaCount: 0 # Set to 0 to help prevent Deployment template rendering
 nodeSelector:
   node-role.kubernetes.io/control-plane: ""
 additionalTolerations:
